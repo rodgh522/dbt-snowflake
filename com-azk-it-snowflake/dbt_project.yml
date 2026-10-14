@@ -1,0 +1,33 @@
+name: 'com_azk_it_snowflake'
+version: '1.0.0'
+config-version: 2
+
+profile: 'com_azk_it_snowflake'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  com_azk_it_snowflake:
+    silver:
+      +materialized: table
+      +table_type: iceberg
+      +external_volume: EXT_VOL_SILVER_S3
+      +database: COM_AZK_AIBI_WRK
+      +schema: AIBI_SILVER
+      +snowflake_warehouse: EDP_COM_AZK_AIBI_INGESTION_WH
+    gold:
+      +materialized: table
+      +table_type: iceberg
+      +external_volume: EXT_VOL_GOLD_S3
+      +database: COM_AZK_AIBI_PUB
+      +schema: AIBI_GOLD
+      +snowflake_warehouse: EDP_COM_AZK_AIBI_INGESTION_WH
