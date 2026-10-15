@@ -5,17 +5,17 @@ com_azk_it_snowflake:
       type: snowflake
       account: 'not needed'
       user: 'not needed'
-      role: FR_DATA_ENGINEER_ADMIN
-      database: COM_AZK_AIBI_WRK
-      schema: AIBI_SILVER
-      warehouse: WH_TRANSFORM_SILVER
-      threads: 4
+      role: FR_PIPELINE_SERVICE
+      database: dbt_test
+      schema: dbt_workspace
+      warehouse: SNOWFLAKE_LEARNING_WH
+      threads: 8
     prod:
       type: snowflake
       account: 'not needed'
       user: 'not needed'
       role: FR_PIPELINE_SERVICE
-      database: COM_AZK_AIBI_PUB
-      schema: AIBI_GOLD
-      warehouse: WH_TRANSFORM_GOLD
+      database: dbt_test
+      schema: dbt_workspace
+      warehouse: SNOWFLAKE_LEARNING_WH
       threads: 8

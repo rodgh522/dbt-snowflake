@@ -2,10 +2,9 @@ name: PR Accepted Deployment
 run-name: PR from ${{ github.actor }} accepted - triggered a ${{ github.event_name }}
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
     paths:
       - 'com-azk-it-snowflake/**'
-      - 'tasty_bytes_dbt_demo/**'
       - '.github/workflows/**'
 
 permissions:
@@ -16,14 +15,14 @@ jobs:
   run-snowflake-dbt-job:
     name: "Run on Accepted PR"
     runs-on: ubuntu-latest
-    environment: prod # Must match the OIDC subject's environment
+    environment: dev # Must match the OIDC subject's environment
     env:
       SNOWFLAKE_CLI_FEATURES_ENABLE_DBT: true
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-      # SNOWFLAKE_USER: ${{ vars.SNOWFLAKE_USER }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
       # SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PAT }} # Snowflake password is required if you aren't using OIDC
-      SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
-      SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
+      SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
 
     steps:
       # Check out repository code with depth 2 to enable git diff HEAD~1
