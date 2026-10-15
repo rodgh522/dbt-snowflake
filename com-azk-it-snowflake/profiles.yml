@@ -1,4 +1,4 @@
-tasty_bytes:
+com_azk_it_snowflake:
   target: dev
   outputs:
     dev:
