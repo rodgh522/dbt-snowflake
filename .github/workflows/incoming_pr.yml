@@ -26,7 +26,7 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
 
     steps:
-      # Check out repository code with depth 0 for full git diff comparison against origin/main
+      # Check out repository code with depth 0 for full git diff comparison against origin/main or origin/dev
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
@@ -51,11 +51,11 @@ jobs:
             --dbt-version 1.10.15 \
             --force -x
 
-      # Pattern 2: PR 변경 파일 검증
-      - name: Check Changed Procedures and Tasks
+      # PR 변경 파일 확인
+      - name: Check Changed Models in this PR
         run: |
-          echo "=== Changed SQL Files in this PR ==="
-          git diff --name-only --diff-filter=ACMR origin/main...HEAD -- 'com-azk-it-snowflake/sql' || true
+          echo "=== Changed Files in this PR ==="
+          git diff --name-only --diff-filter=ACMR origin/dev...HEAD -- 'com-azk-it-snowflake' || true
 
       # Builds all models and runs tests in DAG order on dev target
       - name: Build and test dbt project

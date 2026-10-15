@@ -7,7 +7,7 @@
 ### 핵심 설계 원칙
 1. **스토리지와 컴퓨팅의 완전한 분리**: 데이터는 고객 소유의 AWS S3 버킷에 Parquet/Iceberg 형식으로 영구 보관되며, Snowflake는 고성능 쿼리 및 데이터 가공 컴퓨팅 엔진으로 동작합니다.
 2. **오픈 테이블 포맷 (Apache Iceberg)**: 벤더 락인을 방지하고, ACID 트랜잭션, 타임 트래블, 스키마 에볼루션을 보장하며, 외부 분석 엔진(Athena, Spark 등)과의 상호 운용성을 확보합니다.
-3. **네이티브 서버리스 파이프라인**: 복잡한 외부 오케스트레이터(Airflow 등) 의존성을 최소화하고, Snowflake Stored Procedure(Snowflake Scripting)와 Snowflake Tasks를 활용하여 멱등성(Idempotency)과 무결성이 보장되는 파이프라인을 운영합니다.
+3. **dbt Projects on Snowflake 기반 선언적 파이프라인**: 복잡한 수동 Stored Procedure 관리 및 외부 오케스트레이터(Airflow 등) 의존성을 제거하고, Snowflake 네이티브 dbt 객체(`DBT PROJECT`)와 Snowflake Tasks를 결합하여 시각적 DAG 관측성, 자동 스키마 진화(Schema Evolution), 멱등성(Idempotency) 및 무결성이 보장되는 파이프라인을 운영합니다.
 
 ---
 
@@ -160,25 +160,25 @@ flowchart LR
 
     subgraph Silver_Tier["2. Silver Tier (Cleansed / Work)"]
         EV_S["External Volume\n(EXT_VOL_SILVER_S3)\n[READ_WRITE]"]
-        SP_S["Stored Procedure\n(SP_INV_MATERIAL_MASTER)"]
+        M_S["dbt Model\n(inv_material_master.sql)"]
         T_S["Iceberg Table\n(inv_material_master)"]
-        T_S_REF["Iceberg Table\n(isl_material_master)"]
+        T_S_REF["dbt Model\n(isl_material_master.sql)"]
     end
 
     subgraph Gold_Tier["3. Gold Tier (Aggregated / Mart)"]
         EV_G["External Volume\n(EXT_VOL_GOLD_S3)\n[READ_WRITE]"]
-        SP_G["Stored Procedure\n(SP_GOLD_SUPPLY_CHAIN_DAILY)"]
+        M_G["dbt Model\n(dm_supply_chain_daily.sql)"]
         T_G["Iceberg Table\n(dm_supply_chain_daily)"]
     end
 
     S3_B <-->|External Volume Sync| EV_B --> T_B
-    T_B -->|Read & Validate| SP_S
-    T_S_REF -->|Dimension Join| SP_S
-    SP_S -->|INSERT OVERWRITE| T_S
+    T_B -->|dbt source| M_S
+    T_S_REF -->|dbt ref| M_S
+    M_S -->|dbt build| T_S
     T_S <--> EV_S <--> S3_S
 
-    T_S -->|Business Aggregation| SP_G
-    SP_G -->|INSERT OVERWRITE| T_G
+    T_S -->|dbt ref| M_G
+    M_G -->|dbt build| T_G
     T_G <--> EV_G <--> S3_G
 ```
 
@@ -228,279 +228,170 @@ CREATE OR REPLACE EXTERNAL VOLUME EXT_VOL_GOLD_S3
   * Bronze Role은 `s3:GetObject`, `s3:ListBucket`만 허용(쓰기 차단).
   * Silver/Gold Role은 `s3:PutObject`, `s3:DeleteObject`, `s3:AbortMultipartUpload` 추가 허용.
 
-### 4.3 Apache Iceberg Table 구성 전략
+### 4.3 Apache Iceberg Table 구성 및 dbt 구체화 전략
 - **Bronze 계층**:
-  - External Volume 메타데이터 기반으로 테이블이 자동 생성/연동되는 Unmanaged Iceberg Table.
-  - 사용자는 직접 DML/DDL 조작을 하지 않음 (Read-Only).
+  - External Volume 메타데이터 기반으로 자동 연동되는 Unmanaged Iceberg Table (Read-Only Source).
 - **Silver 및 Gold 계층**:
-  - Snowflake가 Iceberg 메타데이터 라이프사이클을 관리하는 **Snowflake Managed Iceberg Table**.
-  - `CATALOG = 'SNOWFLAKE'`, `EXTERNAL_VOLUME = 'EXT_VOL_SILVER_S3'`, `BASE_LOCATION = '<table_name>/'` 명시.
+  - Snowflake가 메타데이터를 관리하는 **Snowflake Managed Iceberg Table**.
+  - 수동 DDL 작성 대신, **dbt 설정(`dbt_project.yml`)을 통해 자동으로 Iceberg 테이블 구체화**를 관리합니다.
 
-```sql
--- Silver Iceberg Table 생성 예시
-CREATE ICEBERG TABLE IF NOT EXISTS COM_AZK_AIBI_WRK.AIBI_SILVER.inv_material_master (
-    product_code_global                        VARCHAR,
-    material_code                              VARCHAR,
-    material_desc                              VARCHAR,
-    planning_technique                         VARCHAR,
-    stock_transfer_horizon                     INTEGER,
-    minimum_lot_quantity                       INTEGER,
-    gr_processing_time                         VARCHAR,
-    minimum_required_shelf_life_for_sale_month INTEGER,
-    therapy_area                               VARCHAR,
-    business_unit                              VARCHAR,
-    brand_code                                 VARCHAR,
-    brand_name                                 VARCHAR,
-    brand_group                                VARCHAR,
-    _load_dtm                                  TIMESTAMP_NTZ(6),
-    _src_synced                                TIMESTAMP_NTZ(6)
-)
-EXTERNAL_VOLUME = 'EXT_VOL_SILVER_S3'
-CATALOG = 'SNOWFLAKE'
-BASE_LOCATION = 'inv_material_master/';
+```yaml
+# com-azk-it-snowflake/dbt_project.yml 구체화 설정 예시
+models:
+  com_azk_it_snowflake:
+    silver:
+      +materialized: table
+      +table_type: iceberg
+      +external_volume: EXT_VOL_SILVER_S3
+      +database: COM_AZK_AIBI_WRK
+      +schema: AIBI_SILVER
+    gold:
+      +materialized: table
+      +table_type: iceberg
+      +external_volume: EXT_VOL_GOLD_S3
+      +database: COM_AZK_AIBI_PUB
+      +schema: AIBI_GOLD
 ```
 
-### 4.4 Stored Procedure 기반 데이터 전처리 표준 프레임워크
+### 4.4 dbt 모델 기반 데이터 전처리 및 품질 표준 프레임워크
 
-파이프라인의 모든 전처리 프로시저는 다음의 **5대 신뢰성 원칙**을 준수합니다.
+수동 Stored Procedure 대신 **dbt 선언적 모델 (`models/silver/inv_material_master.sql`)**을 데이터 전처리의 표준으로 사용합니다.
 
-1. **Short-Circuit / 변경 감지 (Skip Logic)**:
-   - Bronze 원천의 변경 시각(`MAX(_fivetran_synced)`)과 타깃 테이블의 `_src_synced`, 참조 테이블의 `_load_dtm`을 비교하여 변동이 없을 경우 즉시 `SKIPPED` 반환. 불필요한 웨어하우스 비용 절감.
-2. **사전 데이터 품질 게이트 (Exception Handling)**:
-   - `empty_batch (-20005)`: 원천 데이터 0건 여부.
-   - `ambiguous_brand (-20002)`: 1:N 조인 매핑 충돌 방지.
-   - `duplicate_key (-20006)`: 자연키/기본키 중복 검증.
-3. **격리된 임시 가공 (`TEMP TABLE`)**:
-   - `CREATE OR REPLACE TEMP TABLE`을 통해 대소문자 무시 파싱(`GET_IGNORE_CASE`), 타입 캐스팅(`TRY_TO_DOUBLE`), 포맷팅, 참조 테이블 조인을 격리 수행.
-4. **원자적 적재 (`INSERT OVERWRITE INTO`)**:
-   - 전처리 및 검증이 100% 완료된 데이터만 대상 테이블에 원자적으로 덮어쓰기(All-or-Nothing).
-5. **감사 추적성 확보 (Audit Trail)**:
-   - 적재 시각(`_load_dtm`)과 원천 동기화 시점(`_src_synced`)을 기록하여 데이터 계보(Lineage) 확보.
+#### 5대 신뢰성 원칙의 dbt 네이티브 충족 방식
+1. **멱등성 및 원자적 구체화**: dbt가 빌드 시점에 테이블을 원자적으로 교체(All-or-Nothing)하여 데이터 무결성 보장.
+2. **사전 데이터 품질 게이트 (`dbt test`)**: `inv_material_master.yml`에 선언된 `unique`, `not_null`, 참조 무결성 테스트를 통해 배포/빌드 시 검증 실패 시 파이프라인 차단.
+3. **격리된 CTE 변환**: 모듈화된 CTE(`bronze`, `source_cleansed`, `brand_joined`)를 통해 대소문자 무시 파싱 및 타입 캐스팅 수행.
+4. **자동 스키마 진화 (Schema Evolution)**: 타깃 컬럼 추가/수정/삭제 시 수동 `ALTER TABLE` DDL 없이 dbt 모델의 `SELECT` 구문 수정만으로 자동 반영.
+5. **감사 추적성 확보**: `_load_dtm`, `_src_synced` 컬럼을 쿼리에서 자동 생성하여 데이터 계보(Lineage) 확보.
 
-#### [참조 프로시저 구현 코드]
+#### [dbt 모델 구현 코드: `models/silver/inv_material_master.sql`]
 ```sql
-CREATE OR REPLACE PROCEDURE COM_AZK_AIBI_WRK.AIBI_SILVER.SP_INV_MATERIAL_MASTER()
-RETURNS VARCHAR
-LANGUAGE SQL
-COMMENT='Supply-chain material master full refresh. Bronze kr_material_master + brand from isl_material_master -> Silver inv_material_master. Skips when Bronze _fivetran_synced is unchanged AND isl_material_master was not reloaded since the last load. Run after SP_ISL_MATERIAL_MASTER.'
-EXECUTE AS CALLER
-AS '
-DECLARE
-    ambiguous_brand EXCEPTION (-20002, ''Conflicting brand mappings for material_code in isl_material_master; resolve duplicates before load.'');
-    empty_batch     EXCEPTION (-20005, ''No rows in kr_material_master batch; target is unchanged.'');
-    duplicate_key   EXCEPTION (-20006, ''Duplicate material_code (local_code) in kr_material_master; master would fan out joins. Target is unchanged.'');
+{{ config(
+    materialized='table',
+    table_type='iceberg',
+    external_volume='EXT_VOL_SILVER_S3'
+) }}
 
-    v_inserted      INTEGER DEFAULT 0;
-    v_src_synced    TIMESTAMP_NTZ(6);   -- Bronze 현재 _fivetran_synced
-    v_tgt_synced    TIMESTAMP_NTZ(6);   -- Silver에 마지막으로 적재된 Bronze _fivetran_synced
-    v_ref_load_dtm  TIMESTAMP_NTZ(6);   -- 브랜드 참조 Silver(isl_material_master) 최종 적재시각
-    v_tgt_load_dtm  TIMESTAMP_NTZ(6);   -- inv_material_master 최종 적재시각
-BEGIN
-    USE SCHEMA COM_AZK_AIBI_WRK.AIBI_SILVER;
+WITH bronze AS (
+    SELECT OBJECT_CONSTRUCT_KEEP_NULL(b.*) AS r
+    FROM {{ source('bronze', 'kr_material_master') }} AS b
+),
 
-    ------------------------------------------------------------------
-    -- 0. 변경 여부 체크
-    ------------------------------------------------------------------
-    SELECT MAX(b."_fivetran_synced"::TIMESTAMP_NTZ(6))
-      INTO :v_src_synced
-      FROM COM_AZK_AIBI_RAW_MDLS."aibi_bronze"."kr_material_master" AS b;
-
-    SELECT MAX(_src_synced), MAX(_load_dtm)
-      INTO :v_tgt_synced, :v_tgt_load_dtm
-      FROM COM_AZK_AIBI_WRK.AIBI_SILVER.inv_material_master;
-
-    SELECT MAX(_load_dtm)
-      INTO :v_ref_load_dtm
-      FROM COM_AZK_AIBI_WRK.AIBI_SILVER.isl_material_master;
-
-    IF (v_src_synced IS NULL) THEN
-        RAISE empty_batch;
-    END IF;
-
-    IF (v_tgt_synced IS NOT NULL AND v_src_synced = v_tgt_synced
-        AND v_ref_load_dtm <= v_tgt_load_dtm) THEN
-        RETURN ''SKIPPED | no change (_fivetran_synced='' || v_src_synced
-               || '', isl_material_master _load_dtm='' || v_ref_load_dtm || '')'';
-    END IF;
-
-    ------------------------------------------------------------------
-    -- 1. 브랜드 매핑 충돌 확인
-    ------------------------------------------------------------------
-    IF (EXISTS (SELECT 1 FROM COM_AZK_AIBI_WRK.AIBI_SILVER.isl_material_master
-                GROUP BY material_code
-                HAVING COUNT(DISTINCT TO_JSON(OBJECT_CONSTRUCT_KEEP_NULL(''brand_code'', brand_code,
-                                                                         ''brand_group'', brand_group))) > 1)) THEN
-        RAISE ambiguous_brand;
-    END IF;
-
-    ------------------------------------------------------------------
-    -- 2. Bronze 파싱 + 브랜드 결합 → 배치 임시 테이블
-    ------------------------------------------------------------------
-    CREATE OR REPLACE TEMP TABLE batch_inv_material_master AS
-    WITH bronze AS (
-        SELECT OBJECT_CONSTRUCT_KEEP_NULL(b.*) AS r
-        FROM COM_AZK_AIBI_RAW_MDLS."aibi_bronze"."kr_material_master" AS b
-    ), source AS (
-        SELECT
-            GET_IGNORE_CASE(r, ''product_number_global_code'')::VARCHAR                     AS product_code_global,
-            GET_IGNORE_CASE(r, ''local_code'')::VARCHAR                                     AS material_code,
-            REPLACE(GET_IGNORE_CASE(r, ''product_description'')::VARCHAR, '''''''', '''')        AS material_desc,
-            GET_IGNORE_CASE(r, ''planning_technique'')::VARCHAR                             AS planning_technique,
-            TRUNC(TRY_TO_DOUBLE(GET_IGNORE_CASE(r,
-                ''stock_transfer_horizon_stock_replenishment_lead_time_calendar_day'')::VARCHAR))::INTEGER AS stock_transfer_horizon,
-            TRUNC(TRY_TO_DOUBLE(GET_IGNORE_CASE(r, ''minimum_lot_quantity'')::VARCHAR))::INTEGER        AS minimum_lot_quantity,
-            GET_IGNORE_CASE(r, ''gr_processing_time_import_testing_lead_time_working_day'')::VARCHAR    AS gr_processing_time,
-            TRUNC(TRY_TO_DOUBLE(GET_IGNORE_CASE(r,
-                ''minimum_required_shelf_life_for_sale_month'')::VARCHAR))::INTEGER                    AS minimum_required_shelf_life_for_sale_month,
-            GET_IGNORE_CASE(r, ''ta'')::VARCHAR                                             AS therapy_area,
-            GET_IGNORE_CASE(r, ''business_unit'')::VARCHAR                                  AS business_unit
-        FROM bronze
-        WHERE GET_IGNORE_CASE(r, ''local_code'')::VARCHAR IS NOT NULL
-    ), brand AS (
-        SELECT DISTINCT material_code, brand_code, brand_group
-        FROM COM_AZK_AIBI_WRK.AIBI_SILVER.isl_material_master
-    )
+source_cleansed AS (
     SELECT
-        s.product_code_global,
-        s.material_code,
-        s.material_desc,
-        s.planning_technique,
-        s.stock_transfer_horizon,
-        s.minimum_lot_quantity,
-        s.gr_processing_time,
-        s.minimum_required_shelf_life_for_sale_month,
-        s.therapy_area,
-        s.business_unit,
-        b.brand_code,
-        INITCAP(SPLIT_PART(s.material_desc, '' '', 1))                        AS brand_name,
-        b.brand_group,
-        CONVERT_TIMEZONE(''UTC'', ''Asia/Seoul'', SYSDATE())::TIMESTAMP_NTZ(6) AS _load_dtm
-    FROM source AS s
-    LEFT JOIN brand AS b USING (material_code);
+        GET_IGNORE_CASE(r, 'product_number_global_code')::VARCHAR                     AS product_code_global,
+        GET_IGNORE_CASE(r, 'local_code')::VARCHAR                                     AS material_code,
+        REPLACE(GET_IGNORE_CASE(r, 'product_description')::VARCHAR, '''', '')        AS material_desc,
+        GET_IGNORE_CASE(r, 'planning_technique')::VARCHAR                             AS planning_technique,
+        TRUNC(TRY_TO_DOUBLE(GET_IGNORE_CASE(r,
+            'stock_transfer_horizon_stock_replenishment_lead_time_calendar_day')::VARCHAR))::INTEGER AS stock_transfer_horizon,
+        TRUNC(TRY_TO_DOUBLE(GET_IGNORE_CASE(r, 'minimum_lot_quantity')::VARCHAR))::INTEGER        AS minimum_lot_quantity,
+        GET_IGNORE_CASE(r, 'gr_processing_time_import_testing_lead_time_working_day')::VARCHAR    AS gr_processing_time,
+        TRUNC(TRY_TO_DOUBLE(GET_IGNORE_CASE(r,
+            'minimum_required_shelf_life_for_sale_month')::VARCHAR))::INTEGER                    AS minimum_required_shelf_life_for_sale_month,
+        GET_IGNORE_CASE(r, 'ta')::VARCHAR                                             AS therapy_area,
+        GET_IGNORE_CASE(r, 'business_unit')::VARCHAR                                  AS business_unit,
+        GET_IGNORE_CASE(r, '_fivetran_synced')::TIMESTAMP_NTZ(6)                      AS _src_synced
+    FROM bronze
+    WHERE GET_IGNORE_CASE(r, 'local_code')::VARCHAR IS NOT NULL
+),
 
-    ------------------------------------------------------------------
-    -- 3. 배치 검증 (Full refresh 실패 시 타깃 덮어쓰기 차단)
-    ------------------------------------------------------------------
-    IF (NOT EXISTS (SELECT 1 FROM batch_inv_material_master)) THEN
-        RAISE empty_batch;
-    END IF;
+brand AS (
+    SELECT DISTINCT material_code, brand_code, brand_group
+    FROM {{ ref('isl_material_master') }}
+)
 
-    IF (EXISTS (SELECT 1 FROM batch_inv_material_master
-                GROUP BY material_code HAVING COUNT(*) > 1)) THEN
-        RAISE duplicate_key;
-    END IF;
-
-    ------------------------------------------------------------------
-    -- 4. Full refresh (_src_synced 기록)
-    ------------------------------------------------------------------
-    INSERT OVERWRITE INTO COM_AZK_AIBI_WRK.AIBI_SILVER.inv_material_master
-        (product_code_global, material_code, material_desc, planning_technique, stock_transfer_horizon,
-         minimum_lot_quantity, gr_processing_time, minimum_required_shelf_life_for_sale_month,
-         therapy_area, business_unit, brand_code, brand_name, brand_group, _load_dtm, _src_synced)
-    SELECT product_code_global, material_code, material_desc, planning_technique, stock_transfer_horizon,
-           minimum_lot_quantity, gr_processing_time, minimum_required_shelf_life_for_sale_month,
-           therapy_area, business_unit, brand_code, brand_name, brand_group, _load_dtm, :v_src_synced
-    FROM batch_inv_material_master;
-
-    v_inserted := SQLROWCOUNT;
-
-    DROP TABLE IF EXISTS batch_inv_material_master;
-
-    RETURN ''SUCCESS | overwritten, inserted='' || v_inserted
-           || '' (_src_synced='' || v_src_synced || '')'';
-
-EXCEPTION
-    WHEN OTHER THEN
-        RAISE;
-END;
-';
+SELECT
+    s.product_code_global,
+    s.material_code,
+    s.material_desc,
+    s.planning_technique,
+    s.stock_transfer_horizon,
+    s.minimum_lot_quantity,
+    s.gr_processing_time,
+    s.minimum_required_shelf_life_for_sale_month,
+    s.therapy_area,
+    s.business_unit,
+    b.brand_code,
+    INITCAP(SPLIT_PART(s.material_desc, ' ', 1))                        AS brand_name,
+    b.brand_group,
+    CONVERT_TIMEZONE('UTC', 'Asia/Seoul', SYSDATE())::TIMESTAMP_NTZ(6) AS _load_dtm,
+    s._src_synced
+FROM source_cleansed AS s
+LEFT JOIN brand AS b USING (material_code)
 ```
 
-### 4.5 Snowflake Tasks를 활용한 DAG 오케스트레이션
+#### [dbt 품질 검증 명세: `models/silver/inv_material_master.yml`]
+```yaml
+version: 2
 
-선행 태스크 완료 후 후행 태스크가 순차 실행되는 Serverless DAG 구조를 구축합니다.
+models:
+  - name: inv_material_master
+    description: "Silver 계층 공급망 자재 마스터 Iceberg 테이블"
+    columns:
+      - name: material_code
+        description: "자재 고유 코드 (기본키)"
+        tests:
+          - unique
+          - not_null
+      - name: product_code_global
+        tests:
+          - not_null
+```
+
+### 4.5 Snowflake Tasks를 활용한 dbt DAG 오케스트레이션
+
+개별 프로시저를 순차 호출할 필요 없이, **Snowflake Task가 `EXECUTE DBT PROJECT`를 단일 명령으로 호출**하여 dbt 내부의 모델 의존성(DAG)에 따라 전체 레이크하우스를 자동 실행합니다.
 
 ```sql
-USE SCHEMA COM_AZK_AIBI_WRK.AIBI_SILVER;
+USE SCHEMA COM_AZK_MGMT_DB.TASKS;
 
--- 1. Silver 사전 참조 테이블 적재 태스크 (Root Task)
-CREATE OR REPLACE TASK TSK_SILVER_ISL_MATERIAL_MASTER
-  WAREHOUSE = WH_TRANSFORM_SILVER
+-- dbt 프로젝트 일괄 빌드 및 테스트 태스크
+CREATE OR ALTER TASK COM_AZK_MGMT_DB.TASKS.TSK_RUN_DBT_LAKEHOUSE
+  WAREHOUSE = EDP_COM_AZK_AIBI_INGESTION_WH
   SCHEDULE = 'USING CRON 0 4 * * * Asia/Seoul' -- 매일 04:00 KST
   AS
-    CALL SP_ISL_MATERIAL_MASTER();
+    EXECUTE DBT PROJECT com_azk_it_snowflake_object ARGS='build --target prod';
 
--- 2. Silver 자재 마스터 적재 태스크 (Child Task - Root 완료 후 실행)
-CREATE OR REPLACE TASK TSK_SILVER_INV_MATERIAL_MASTER
-  WAREHOUSE = WH_TRANSFORM_SILVER
-  AFTER TSK_SILVER_ISL_MATERIAL_MASTER
-  AS
-    CALL SP_INV_MATERIAL_MASTER();
-
--- 3. Gold 계층 집계 태스크 (Child Task - Silver 완료 후 실행)
-CREATE OR REPLACE TASK COM_AZK_AIBI_PUB.AIBI_GOLD.TSK_GOLD_SUPPLY_CHAIN_DAILY
-  WAREHOUSE = WH_TRANSFORM_GOLD
-  AFTER COM_AZK_AIBI_WRK.AIBI_SILVER.TSK_SILVER_INV_MATERIAL_MASTER
-  AS
-    CALL COM_AZK_AIBI_PUB.AIBI_GOLD.SP_GOLD_SUPPLY_CHAIN_DAILY();
-
--- 4. 태스크 활성화 (반드시 하위 Child부터 상위 Root 순서로 RESUME)
-ALTER TASK COM_AZK_AIBI_PUB.AIBI_GOLD.TSK_GOLD_SUPPLY_CHAIN_DAILY RESUME;
-ALTER TASK COM_AZK_AIBI_WRK.AIBI_SILVER.TSK_SILVER_INV_MATERIAL_MASTER RESUME;
-ALTER TASK COM_AZK_AIBI_WRK.AIBI_SILVER.TSK_SILVER_ISL_MATERIAL_MASTER RESUME;
+-- 태스크 활성화
+ALTER TASK COM_AZK_MGMT_DB.TASKS.TSK_RUN_DBT_LAKEHOUSE RESUME;
 ```
 
 ---
 
 ## 5. 운영, 모니터링 및 거버넌스
 
-1. **Resource Monitor (크레딧 한도 보호)**:
-   - `WH_TRANSFORM_SILVER`, `WH_TRANSFORM_GOLD` 등 각 배치 웨어하우스에 크레딧 할당량을 지정하여 예산 초과 방지.
-2. **Event Table 관측성 (Logging & Tracing)**:
-   - 프로시저 실행 스키마에 `ALTER SCHEMA ... SET LOG_LEVEL = 'INFO', TRACE_LEVEL = 'ALWAYS'`를 적용하여 모든 세부 실행 이력 및 예외를 중앙 테이블에 수집.
+1. **Snowsight dbt Projects UI 시각화**:
+   - `Transformations » dbt Projects`에서 전체 파이프라인의 DAG 계보, 각 모델별 소스 코드, 실행 이력 및 런타임 성능을 실시간 모니터링.
+2. **Resource Monitor (크레딧 한도 보호)**:
+   - `EDP_COM_AZK_AIBI_INGESTION_WH` 등 각 배치 웨어하우스에 크레딧 할당량을 지정하여 예산 초과 방지.
 3. **태스크 오류 알림 (Notification Integration)**:
-   - `CREATE NOTIFICATION INTEGRATION`을 통해 AWS SNS 또는 Webhook과 연동하여 Task 실패 시 실시간 장애 알림 발송.
+   - Task 실패 시 실시간 장애 알림 발송.
 
 ---
 
-## 6. CI/CD 자동 배포 및 Git Diff 기반 변경 관리 체계 (Deployment Strategy)
+## 6. CI/CD 자동 배포 체계 (Deployment Strategy)
 
-### 6.1 Git Diff 기반 선별 배포 원칙 (Pattern 2: Selective Deployment)
-프로젝트 규모가 커지고 다수의 Stored Procedure 및 Task가 운영될 때, 모든 SQL을 매번 재컴파일하는 것은 불필요한 웨어하우스 비용과 배포 지연을 유발합니다. 따라서 GitHub Actions CI/CD 파이프라인은 **Git Diff를 통해 추가되거나 수정된 파일만 선별하여 증분 배포**합니다.
-
-1. **변경 감지 기준**:
-   - `git diff --name-only origin/main~1 HEAD` (또는 PR merge 기준)를 활용하여 `com-azk-it-snowflake/sql/` 하위에서 실제로 변경된 `.sql` 파일만 추출.
-2. **순차 실행 (Sequential Deployment)**:
-   - 프로시저가 먼저 배포된 후 태스크가 배포되도록 디렉토리 네이밍(`01_procedures`, `02_tasks`) 순서 준수.
-3. **Task DAG 재활성화**:
-   - 태스크 DDL 변경이 감지되면 하위 Child부터 상위 Root 순으로 즉시 `RESUME` 적용.
-
-### 6.2 디렉토리 표준 구조
+### 6.1 dbt Projects on Snowflake 배포 원칙
+1. **단일 배포 파이프라인**:
+   - GitHub Actions CI/CD를 통해 `snow dbt deploy` 명령어로 dbt 프로젝트 객체를 배포하고, `snow dbt execute`로 테스트 빌드를 수행.
+2. **디렉토리 표준 구조**:
 ```text
 com-azk-it-snowflake/
-├── dbt_project.yml
-├── packages.yml
-├── profiles.yml
-├── models/                         # dbt 네이티브 모델 (SELECT 쿼리)
-│   ├── silver/
-│   └── gold/
-└── sql/                            # Snowflake 네이티브 오브젝트 (DML/DDL)
-    ├── 01_procedures/              # Stored Procedures
-    │   ├── silver/
-    │   │   ├── sp_isl_material_master.sql
-    │   │   └── sp_inv_material_master.sql
-    │   └── gold/
-    │       └── sp_gold_supply_chain_daily.sql
-    └── 02_tasks/                   # Snowflake Tasks
-        ├── 01_silver_tasks.sql     # Silver Root 및 Child Tasks
-        ├── 02_gold_tasks.sql       # Gold Child Task
-        └── 03_resume_tasks.sql     # Task DAG 활성화 스크립트 (Child -> Root 역순)
+├── dbt_project.yml                   # 프로젝트 및 Iceberg 구체화 설정
+├── packages.yml                      # 외부 패키지 의존성
+├── profiles.yml                      # 타깃(dev/prod) 연결 프로파일
+├── schedules.sql                     # Snowflake Tasks 스케줄링 DDL
+├── models/
+│   ├── sources.yml                   # Bronze 원천 테이블 정의
+│   ├── silver/                       # Silver 계층 모델
+│   │   ├── isl_material_master.sql
+│   │   ├── inv_material_master.sql
+│   │   └── inv_material_master.yml   # 품질 테스트
+│   └── gold/                         # Gold 계층 모델
+│       ├── dm_supply_chain_daily.sql
+│       └── dm_supply_chain_daily.yml
+├── tests/                            # 커스텀 어서션 테스트
+└── macros/                           # Jinja 매크로
 ```
-
-### 6.3 Task DAG 선언 및 활성화 원칙
-1. **선언적 DDL (`CREATE OR ALTER TASK`)**:
-   - `CREATE OR REPLACE TASK` 대신 `CREATE OR ALTER TASK`를 사용하여 기존 태스크의 히스토리와 메타데이터를 유지하며 안전하게 변경.
-2. **배포 시 순서 통제**:
-   - **수정 시**: Root Task 선행 `SUSPEND`
-   - **활성화 시**: Leaf/Child Task부터 역순으로 `RESUME` (Gold Task → Silver Child Task → Silver Root Task)
 

@@ -19,15 +19,15 @@ models:
   com_azk_it_snowflake:
     silver:
       +materialized: table
-      +table_type: iceberg
-      +external_volume: EXT_VOL_SILVER_S3
-      +database: COM_AZK_AIBI_WRK
-      +schema: AIBI_SILVER
-      +snowflake_warehouse: EDP_COM_AZK_AIBI_INGESTION_WH
+      +table_type: "iceberg"
+      # +external_volume: "{{ 'EXT_VOL_SILVER_S3' if target.name == 'prod' else none }}"
+      +database: "{{ 'DBT_TEST' if target.name == 'prod' else target.database }}"
+      +schema: "{{ 'AIBI_SILVER' if target.name == 'prod' else target.schema }}"
+      +snowflake_warehouse: "{{ 'SNOWFLAKE_LEARNING_WH' if target.name == 'prod' else target.warehouse }}"
     gold:
       +materialized: table
-      +table_type: iceberg
-      +external_volume: EXT_VOL_GOLD_S3
-      +database: COM_AZK_AIBI_PUB
-      +schema: AIBI_GOLD
-      +snowflake_warehouse: EDP_COM_AZK_AIBI_INGESTION_WH
+      +table_type: "iceberg"
+      # +external_volume: "{{ 'EXT_VOL_GOLD_S3' if target.name == 'prod' else none }}"
+      +database: "{{ 'DBT_TEST' if target.name == 'prod' else target.database }}"
+      +schema: "{{ 'AIBI_GOLD' if target.name == 'prod' else target.schema }}"
+      +snowflake_warehouse: "{{ 'SNOWFLAKE_LEARNING_WH' if target.name == 'prod' else target.warehouse }}"
