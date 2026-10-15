@@ -25,11 +25,9 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
 
     steps:
-      # Check out repository code with depth 2 to enable git diff HEAD~1
+      # Check out repository code
       - name: Check out repository code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
       - name: Install Snowflake CLI
         uses: snowflakedb/snowflake-cli-action@v2.0
@@ -52,10 +50,10 @@ jobs:
             --dbt-version 1.10.15 \
             --force -x
 
-      # Pattern 2: Git Diff 기반 변경된 Stored Procedures 및 Tasks 선별 배포
-      - name: Deploy Changed Procedures and Tasks (Pattern 2)
+      # Deploy Task orchestration via schedules.sql
+      - name: Deploy Task orchestration
         run: |
-          ./com-azk-it-snowflake/deploy_diff.sh HEAD~1
+          snow sql -f ./com-azk-it-snowflake/schedules.sql -x
 
       - name: List Snowflake dbt project objects
         run: snow dbt list -x
