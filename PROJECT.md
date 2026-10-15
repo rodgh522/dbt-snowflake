@@ -460,3 +460,47 @@ ALTER TASK COM_AZK_AIBI_WRK.AIBI_SILVER.TSK_SILVER_ISL_MATERIAL_MASTER RESUME;
    - 프로시저 실행 스키마에 `ALTER SCHEMA ... SET LOG_LEVEL = 'INFO', TRACE_LEVEL = 'ALWAYS'`를 적용하여 모든 세부 실행 이력 및 예외를 중앙 테이블에 수집.
 3. **태스크 오류 알림 (Notification Integration)**:
    - `CREATE NOTIFICATION INTEGRATION`을 통해 AWS SNS 또는 Webhook과 연동하여 Task 실패 시 실시간 장애 알림 발송.
+
+---
+
+## 6. CI/CD 자동 배포 및 Git Diff 기반 변경 관리 체계 (Deployment Strategy)
+
+### 6.1 Git Diff 기반 선별 배포 원칙 (Pattern 2: Selective Deployment)
+프로젝트 규모가 커지고 다수의 Stored Procedure 및 Task가 운영될 때, 모든 SQL을 매번 재컴파일하는 것은 불필요한 웨어하우스 비용과 배포 지연을 유발합니다. 따라서 GitHub Actions CI/CD 파이프라인은 **Git Diff를 통해 추가되거나 수정된 파일만 선별하여 증분 배포**합니다.
+
+1. **변경 감지 기준**:
+   - `git diff --name-only origin/main~1 HEAD` (또는 PR merge 기준)를 활용하여 `com-azk-it-snowflake/sql/` 하위에서 실제로 변경된 `.sql` 파일만 추출.
+2. **순차 실행 (Sequential Deployment)**:
+   - 프로시저가 먼저 배포된 후 태스크가 배포되도록 디렉토리 네이밍(`01_procedures`, `02_tasks`) 순서 준수.
+3. **Task DAG 재활성화**:
+   - 태스크 DDL 변경이 감지되면 하위 Child부터 상위 Root 순으로 즉시 `RESUME` 적용.
+
+### 6.2 디렉토리 표준 구조
+```text
+com-azk-it-snowflake/
+├── dbt_project.yml
+├── packages.yml
+├── profiles.yml
+├── models/                         # dbt 네이티브 모델 (SELECT 쿼리)
+│   ├── silver/
+│   └── gold/
+└── sql/                            # Snowflake 네이티브 오브젝트 (DML/DDL)
+    ├── 01_procedures/              # Stored Procedures
+    │   ├── silver/
+    │   │   ├── sp_isl_material_master.sql
+    │   │   └── sp_inv_material_master.sql
+    │   └── gold/
+    │       └── sp_gold_supply_chain_daily.sql
+    └── 02_tasks/                   # Snowflake Tasks
+        ├── 01_silver_tasks.sql     # Silver Root 및 Child Tasks
+        ├── 02_gold_tasks.sql       # Gold Child Task
+        └── 03_resume_tasks.sql     # Task DAG 활성화 스크립트 (Child -> Root 역순)
+```
+
+### 6.3 Task DAG 선언 및 활성화 원칙
+1. **선언적 DDL (`CREATE OR ALTER TASK`)**:
+   - `CREATE OR REPLACE TASK` 대신 `CREATE OR ALTER TASK`를 사용하여 기존 태스크의 히스토리와 메타데이터를 유지하며 안전하게 변경.
+2. **배포 시 순서 통제**:
+   - **수정 시**: Root Task 선행 `SUSPEND`
+   - **활성화 시**: Leaf/Child Task부터 역순으로 `RESUME` (Gold Task → Silver Child Task → Silver Root Task)
+
