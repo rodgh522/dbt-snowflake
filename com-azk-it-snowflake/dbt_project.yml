@@ -20,14 +20,14 @@ models:
     silver:
       +materialized: table
       +table_type: "iceberg"
-      # +external_volume: "{{ 'EXT_VOL_SILVER_S3' if target.name == 'prod' else none }}"
+      +external_volume: "EXT_VOL_SILVER_S3"
       +database: "DBT_TEST"
       +schema: "AIBI_SILVER"
       +snowflake_warehouse: "SNOWFLAKE_LEARNING_WH"
     gold:
       +materialized: table
       +table_type: "iceberg"
-      # +external_volume: "{{ 'EXT_VOL_GOLD_S3' if target.name == 'prod' else none }}"
+      +external_volume: "EXT_VOL_GOLD_S3"
       +database: "DBT_TEST"
       +schema: "AIBI_GOLD"
       +snowflake_warehouse: "SNOWFLAKE_LEARNING_WH"
