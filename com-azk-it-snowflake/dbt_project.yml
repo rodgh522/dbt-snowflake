@@ -19,14 +19,14 @@ models:
   com_azk_it_snowflake:
     silver:
       +materialized: table
-      +table_type: "iceberg"
+      +table_format: "iceberg"
       +external_volume: "EXT_VOL_SILVER_S3"
       +database: "DBT_TEST"
       +schema: "AIBI_SILVER"
       +snowflake_warehouse: "SNOWFLAKE_LEARNING_WH"
     gold:
       +materialized: table
-      +table_type: "iceberg"
+      +table_format: "iceberg"
       +external_volume: "EXT_VOL_GOLD_S3"
       +database: "DBT_TEST"
       +schema: "AIBI_GOLD"
