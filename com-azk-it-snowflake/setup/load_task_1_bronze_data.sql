@@ -270,3 +270,11 @@ INSERT INTO dbt_test."aibi_bronze"."patient_progress_brands_tagrisso" (
     (2277, '2026-10-19 06:07:37.399 +0900'::TIMESTAMP_LTZ(6), 'Tagrisso', 1, 'Sep', 'Oncology', 25, 'Top20', 'ADAURA', '인천성모병원', 'Onco', '25 Q3', ' ', 'tagrisso RAW', 'General/Patient Progress All Brands.xlsx', '2026-10-19 03:12:05.000 +0900'::TIMESTAMP_LTZ(6)),
     (502, '2026-10-19 06:07:37.135 +0900'::TIMESTAMP_LTZ(6), 'Tagrisso', 4, 'Feb', 'Oncology', 24, 'Top20', 'FLAURA', '길병원', 'Onco', '24 Q1', ' ', 'tagrisso RAW', 'General/Patient Progress All Brands.xlsx', '2026-10-19 03:12:05.000 +0900'::TIMESTAMP_LTZ(6));
 
+
+-- ------------------------------------------------------------------------------
+-- 3. Grant Permissions to Pipeline Role (FR_PIPELINE_SERVICE)
+-- ------------------------------------------------------------------------------
+GRANT USAGE ON DATABASE dbt_test TO ROLE FR_PIPELINE_SERVICE;
+GRANT USAGE ON SCHEMA dbt_test."aibi_bronze" TO ROLE FR_PIPELINE_SERVICE;
+GRANT SELECT ON ALL ICEBERG TABLES IN SCHEMA dbt_test."aibi_bronze" TO ROLE FR_PIPELINE_SERVICE;
+GRANT SELECT ON FUTURE ICEBERG TABLES IN SCHEMA dbt_test."aibi_bronze" TO ROLE FR_PIPELINE_SERVICE;
