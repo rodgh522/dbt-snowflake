@@ -4,6 +4,10 @@ sources:
   - name: bronze
     database: "DBT_TEST"
     schema: "AIBI_BRONZE"
+    quoting:
+      database: false
+      schema: false
+      identifier: true
     tables:
       - name: patient_progress_brands_enhertu
         description: "Enhertu 브랜드 신환 진행 현황 원천 Iceberg 테이블"
