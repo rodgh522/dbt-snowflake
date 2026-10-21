@@ -7,3 +7,19 @@ sources:
     tables:
       - name: kr_material_master
         description: "원천 S3에서 동기화된 자재 마스터 Iceberg 테이블"
+      - name: patient_progress_brands_enhertu
+        description: "Enhertu 브랜드 신환 진행 현황 원천 Iceberg 테이블"
+        columns:
+          - name: _line
+            description: "원천 레코드 라인 식별자 (Primary Key)"
+            tests:
+              - unique
+              - not_null
+      - name: patient_progress_brands_tagrisso
+        description: "Tagrisso 브랜드 신환 진행 현황 원천 Iceberg 테이블"
+        columns:
+          - name: _line
+            description: "원천 레코드 라인 식별자 (Primary Key)"
+            tests:
+              - unique
+              - not_null
