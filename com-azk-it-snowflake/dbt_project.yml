@@ -17,13 +17,6 @@ clean-targets:
 
 models:
   com_azk_it_snowflake:
-    bronze:
-      +materialized: table
-      +table_format: "iceberg"
-      +external_volume: "EXT_VOL_BRONZE_S3"
-      +database: "DBT_TEST"
-      +schema: "AIBI_BRONZE"
-      +snowflake_warehouse: "SNOWFLAKE_LEARNING_WH"
     silver:
       +materialized: table
       +table_format: "iceberg"
