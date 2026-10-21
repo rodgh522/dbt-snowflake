@@ -7,7 +7,7 @@ WITH source_data AS (
     -- Dev 테스트 환경: 원천 테이블 연결 없이도 컴파일 가능한 안전한 샘플 인메모리 CTE
     SELECT
         1249::NUMBER                                        AS _line,
-        '2026-10-19 06:07:37.251 +0900'::TIMESTAMP_LTZ      AS _fivetran_synced,
+        '2026-10-19 06:07:37.251 +0900'::TIMESTAMP_LTZ(6)   AS _fivetran_synced,
         'Tagrisso'::TEXT                                    AS brand,
         4::NUMBER                                           AS new_pts,
         'Feb'::TEXT                                         AS month,
@@ -21,7 +21,7 @@ WITH source_data AS (
         CAST(NULL AS TEXT)                                  AS sub_indication,
         'tagrisso RAW'::TEXT                                AS _sheet_name,
         'General/Patient Progress All Brands.xlsx'::TEXT    AS file_name,
-        '2026-10-19 03:12:05.000 +0900'::TIMESTAMP_LTZ      AS _modified
+        '2026-10-19 03:12:05.000 +0900'::TIMESTAMP_LTZ(6)   AS _modified
     {% else %}
     SELECT
         "_line"                                             AS _line,
@@ -46,7 +46,7 @@ WITH source_data AS (
 
 SELECT
     _line::INTEGER                                                      AS _line,
-    _fivetran_synced::TIMESTAMP_LTZ                                     AS _fivetran_synced,
+    _fivetran_synced::TIMESTAMP_LTZ(6)                                  AS _fivetran_synced,
     TRIM(brand)::VARCHAR                                                AS brand,
     COALESCE(new_pts, 0)::INTEGER                                       AS new_pts,
     TRIM(month)::VARCHAR                                                AS month,
@@ -64,6 +64,6 @@ SELECT
     NULLIF(TRIM(sub_indication), '')::VARCHAR                           AS sub_indication,
     TRIM(_sheet_name)::VARCHAR                                          AS sheet_name,
     TRIM(file_name)::VARCHAR                                            AS file_name,
-    _modified::TIMESTAMP_LTZ                                            AS _modified,
+    _modified::TIMESTAMP_LTZ(6)                                         AS _modified,
     CONVERT_TIMEZONE('UTC', 'Asia/Seoul', SYSDATE())::TIMESTAMP_NTZ(6)  AS _load_dtm
 FROM source_data
