@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: fact_patient_progress_brands
+    description: "Tagrisso 및 Enhertu 브랜드 신환 진행 현황(Patient Progress) 최종 Gold 팩트 테이블 (Row grain 유지, 무집계)"
+    columns:
+      - name: base_month
+        description: "연도와 월을 파싱하여 생성된 기준월 (해당 월의 1일자)"
+        tests:
+          - not_null
+      - name: brand_name
+        description: "의약품 브랜드명 (Enhertu, Tagrisso 등)"
+        tests:
+          - not_null
+      - name: hca
+        description: "병원명 (Healthcare Agency / Hospital)"
+      - name: tier
+        description: "병원 티어 등급 (Others 표기 표준화 적용: Top5, Top10, Top20, Top30, Others 등)"
+      - name: indication
+        description: "적응증"
+      - name: sub_indication
+        description: "세부 적응증"
+      - name: business_unit
+        description: "사업부 (예: Oncology)"
+      - name: therapy_area
+        description: "치료 영역 (Therapy Area)"
+      - name: cnt_new_patients
+        description: "신환 수 정수값 (TRUNC(new_pts)::INTEGER)"
+        tests:
+          - not_null
+      - name: _load_dtm
+        description: "Gold 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null

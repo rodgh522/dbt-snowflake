@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: isl_patient_progress_brands
+    description: "Tagrisso 및 Enhertu 브랜드 신환 진행 현황(Patient Progress) 통합 Silver 테이블"
+    columns:
+      - name: base_month
+        description: "연도와 월을 파싱하여 생성된 기준월 (해당 월의 1일자)"
+        tests:
+          - not_null
+      - name: brand_name
+        description: "의약품 브랜드명 (Enhertu, Tagrisso 등)"
+        tests:
+          - not_null
+      - name: hca
+        description: "병원명 (Healthcare Agency / Hospital)"
+      - name: tier
+        description: "병원 티어 등급 (Top5, Top10, Top20, Top30, Others 등)"
+      - name: indication
+        description: "적응증"
+      - name: sub_indication
+        description: "세부 적응증"
+      - name: new_pts
+        description: "신환 수 (New Patients)"
+      - name: year
+        description: "원천 연도 값 (2자리 또는 4자리)"
+      - name: month
+        description: "원천 월 텍스트 (영문 약어 등)"
+      - name: qtr
+        description: "분기 (Quarter)"
+      - name: business_unit
+        description: "사업부 (예: Oncology)"
+      - name: therapy_area
+        description: "치료 영역 (Therapy Area)"
+      - name: _file
+        description: "원천 파일명"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스들의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
