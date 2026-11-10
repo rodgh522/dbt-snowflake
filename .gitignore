@@ -1,9 +1,9 @@
-tasty_bytes_dbt_demo
+tasty_bytes_dbt_demo/
 tasty_bytes_dbt_demo/target/
 tasty_bytes_dbt_demo/dbt_packages/
 tasty_bytes_dbt_demo/logs/
 .vscode/settings.json
 
-task_1.md
-task_2.md
-task_3.md
+task_*.md
+TASK*.md
+PROJECT.md
