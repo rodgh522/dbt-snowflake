@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: inv_status_op_d_prep
+    description: "재고 대사(SAP vs DC Stock Reconciliation) 일별 Silver 테이블 (KST 당일 기준 잔여 유효기간 산출)"
+    columns:
+      - name: plant
+        description: "플랜트 코드 (Plant)"
+      - name: storage_location
+        description: "저장 위치 코드 (Storage Location)"
+      - name: material_code
+        description: "자재 코드"
+        tests:
+          - not_null
+      - name: material_desc
+        description: "자재 설명"
+      - name: batch
+        description: "배치 번호 (Batch)"
+      - name: expiry_date
+        description: "유효기한 일자 (Expiry Date)"
+        tests:
+          - not_null
+      - name: stock_status_cd
+        description: "재고 상태 코드 (공백/NULL, 'S', 'X')"
+      - name: stock_status_desc
+        description: "재고 상태 명칭 ('Available', 'Blocked', 'Under Quarantine')"
+      - name: sap_qty
+        description: "SAP 시스템 재고 수량"
+      - name: dc_qty
+        description: "물류센터(DC) 실물 재고 수량"
+      - name: qty_diff
+        description: "재고 수량 차이 (SAP vs DC)"
+      - name: geonet_wms_sled
+        description: "Geonet WMS 유효기한(SLED)"
+      - name: remaining_shelf_life
+        description: "KST 실행 당일 기준 잔여 유효기간 (일수)"
+      - name: remarks_qty
+        description: "수량 차이 비고"
+      - name: remarks_sled
+        description: "유효기한 비고"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

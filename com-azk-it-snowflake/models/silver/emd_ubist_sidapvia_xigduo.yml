@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: emd_ubist_sidapvia_xigduo
+    description: "UBIST 월간 처방량(Sidapvia & Xigduo) Silver 테이블"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - brand_name
+            - channel
+            - competitors
+            - year
+            - mm
+    columns:
+      - name: brand_name
+        description: "브랜드명 (_sheet_name)"
+      - name: channel
+        description: "채널 구분 (_table)"
+      - name: competitors
+        description: "경쟁 제품명 (unit_trend_k_dot)"
+        tests:
+          - not_null
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: rx_dot_volume
+        description: "처방 일수 기준 수량 (K-DOT, NUMBER(15,2))"
+

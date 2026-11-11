@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: gld_emd_co_promo_each_market
+    description: "Co-Promotion 시장별 Detail Frequency 및 SOV 최종 Gold 테이블 (물리 테이블명: EMD_CO_PROMO_EACH_MARKET)"
+    columns:
+      - name: channel_specialty
+        description: "채널 및 전문과"
+      - name: brand_name
+        description: "브랜드/제품명"
+        tests:
+          - not_null
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: rx_count
+        description: "디테일 빈도 / 처방 수"
+      - name: rx_share
+        description: "처방 점유율"
+

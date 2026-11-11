@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: isl_ptn_list_op_d_prep
+    description: "파트너사 일별 매출(Partner List) Silver 테이블 (월별 말일/최신 파일 기준 base_date 단위 파티션 교체)"
+    columns:
+      - name: base_date
+        description: "청구 일자 (billing_date, 파티션 교체 키)"
+        tests:
+          - not_null
+      - name: doc_no
+        description: "청구 문서 번호 (billing_document_number)"
+        tests:
+          - not_null
+      - name: item_no
+        description: "청구 문서 품목 번호"
+      - name: customer_code
+        description: "고객 코드"
+      - name: customer_name
+        description: "고객명"
+      - name: indirect_cust_code
+        description: "2차 고객 코드 (Secondary Customer Code)"
+      - name: indirect_cust_name
+        description: "2차 고객명 (Secondary Customer Name)"
+      - name: ship_to_code
+        description: "납품처 코드 (Ship-to Code)"
+      - name: ship_to_name
+        description: "납품처명 (Ship-to Name)"
+      - name: product_code
+        description: "제품 코드"
+      - name: product_name
+        description: "제품명"
+      - name: sales_qty
+        description: "판매 수량 (정수)"
+      - name: sales_uom
+        description: "판매 단위"
+      - name: unit_price_exvat
+        description: "공급 단가 (VAT 제외)"
+      - name: supply_amount_exvat
+        description: "공급 가액 (VAT 제외)"
+      - name: vat_amount
+        description: "부가세액 (VAT)"
+      - name: sales_amount
+        description: "총 매출 금액"
+      - name: sales_doc_type_code
+        description: "SAP 판매 문서 유형 코드"
+      - name: sales_doc_type_name
+        description: "SAP 판매 문서 유형 명칭"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: gld_emd_market_spending
+    description: "시장별(iOAD, PPI, Respiratory_Spending, Statin) 마케팅 지출 금액 최종 Gold 테이블 (물리 테이블명: EMD_MARKET_SPENDING)"
+    columns:
+      - name: brand_name
+        description: "시장/브랜드 구분"
+        tests:
+          - not_null
+      - name: criteria
+        description: "지출 기준"
+      - name: main_players
+        description: "주요 경쟁사/플레이어"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: spending_amt
+        description: "지출 금액"
+

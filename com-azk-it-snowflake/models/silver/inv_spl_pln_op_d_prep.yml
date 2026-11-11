@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: inv_spl_pln_op_d_prep
+    description: "공급 계획(Supply Plan) 일별 Silver 테이블 (고정 파일명 Supply plan.XLSX 기준 Full Refresh)"
+    columns:
+      - name: avail_req_date
+        description: "가용일 / 소요 일자 (Availability / Requirements Date)"
+      - name: product_number
+        description: "제품 번호 (Product Number)"
+        tests:
+          - not_null
+      - name: product_short_desc
+        description: "제품 요약 설명"
+      - name: category_short_text
+        description: "카테고리 요약 텍스트"
+      - name: receipt_req_element
+        description: "입고/소요 요소 (Receipt / Requirements Element)"
+      - name: receipt_req_qty
+        description: "입고/소요 수량"
+      - name: confirmed_qty_atp
+        description: "확정 ATP 수량 (Confirmed Quantity ATP)"
+      - name: requested_qty
+        description: "요청 수량 (Requested Quantity)"
+      - name: source_location
+        description: "공급 출발지 위치 코드"
+      - name: target_location
+        description: "공급 도착지 위치 코드"
+      - name: material_code_source_loc
+        description: "출발지 기준 로컬 자재 코드"
+      - name: material_code_target_loc
+        description: "도착지 기준 로컬 자재 코드"
+      - name: supply_source
+        description: "공급원 (Supply Source)"
+      - name: pp_firmed
+        description: "PP 확정 여부 (Boolean)"
+      - name: opening_date
+        description: "오프닝 일자 (Opening Date)"
+      - name: base_uom
+        description: "기본 측정 단위 (Base UOM)"
+      - name: schedule_line_date
+        description: "일정 라인 일자 (Schedule Line Date)"
+      - name: creation_date
+        description: "생성 일자 (Creation Date)"
+      - name: delivery_date
+        description: "납품 일자 (Delivery Date)"
+      - name: start_date
+        description: "시작 일자 (Start Date)"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Supply plan.XLSX 파일의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

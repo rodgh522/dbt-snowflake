@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: inv_material_master
+    description: "공급망(Supply Chain) 자재 마스터 Silver 테이블 (isl_material_master의 브랜드 매핑 결합)"
+    columns:
+      - name: product_code_global
+        description: "글로벌 제품 코드 (Product Number Global Code)"
+      - name: material_code
+        description: "로컬 자재 코드 (Local Code, PK)"
+        tests:
+          - not_null
+          - unique
+      - name: material_desc
+        description: "자재 설명 (작은따옴표 제거)"
+      - name: planning_technique
+        description: "계획 기법 (Planning Technique)"
+      - name: stock_transfer_horizon
+        description: "재고 보충 리드타임 (Calendar Day)"
+      - name: minimum_lot_quantity
+        description: "최소 로트 수량 (Minimum Lot Quantity)"
+      - name: gr_processing_time
+        description: "입고 처리 및 수입 검사 리드타임 (Working Day)"
+      - name: minimum_required_shelf_life_for_sale_month
+        description: "판매 가능 최소 잔여 유효기간 (개월)"
+      - name: therapy_area
+        description: "치료 영역 (TA)"
+      - name: business_unit
+        description: "사업부 (Business Unit)"
+      - name: brand_code
+        description: "표준 브랜드 코드 (isl_material_master 참조)"
+      - name: brand_name
+        description: "자재 설명 첫 단어 기반 브랜드명 (INITCAP)"
+      - name: brand_group
+        description: "브랜드 그룹 (isl_material_master 참조)"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

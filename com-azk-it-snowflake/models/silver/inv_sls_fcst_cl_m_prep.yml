@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: inv_sls_fcst_cl_m_prep
+    description: "판매량 예측 스냅샷(Sales Volume Forecast Snapshot) Silver 테이블 (Wide col_YYYYMM -> Long 변환)"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - base_month
+            - material_code
+            - fcst_month
+    columns:
+      - name: base_month
+        description: "스냅샷 제출 기준월 (submission_month, 해당 월 1일자)"
+        tests:
+          - not_null
+      - name: material_code
+        description: "자재 코드 (sku_description 첫 토큰)"
+        tests:
+          - not_null
+      - name: material_desc
+        description: "자재 상세 명칭 (sku_description 나머지 텍스트)"
+      - name: fcst_month
+        description: "예측/실적 대상월 (col_YYYYMM 파싱 결과, 1일자)"
+        tests:
+          - not_null
+      - name: fcst_volume
+        description: "예측 또는 실적 수량"
+        tests:
+          - not_null
+      - name: fcst_month_seq
+        description: "예측 월차 순번 (과거 실적=0, 당월=1, 익월=2 ...)"
+        tests:
+          - not_null
+      - name: data_type_cd
+        description: "데이터 유형 코드 ('ACT': 실적, 'FCST': 예측)"
+        tests:
+          - not_null
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

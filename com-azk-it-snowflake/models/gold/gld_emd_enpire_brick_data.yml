@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: gld_emd_enpire_brick_data
+    description: "Enpire KR Brick별 영업 목표/트래킹 및 DDD 실적 최종 Gold 테이블 (물리 테이블명: EMD_ENPIRE_BRICK_DATA)"
+    columns:
+      - name: year_mm
+        description: "기준 년월"
+      - name: year_qtr
+        description: "기준 년분기"
+      - name: year_half
+        description: "기준 반기"
+      - name: brand
+        description: "브랜드명"
+      - name: brand_code
+        description: "브랜드 코드"
+      - name: brick_code
+        description: "브릭 코드"
+      - name: brick_name
+        description: "브릭 명칭"
+      - name: channel
+        description: "채널"
+      - name: priority
+        description: "우선순위"
+      - name: bu
+        description: "사업부 (BU)"
+      - name: user_prid
+        description: "담당자 PRID"
+      - name: user_name
+        description: "담당자명"
+      - name: dsm_prid
+        description: "DSM PRID"
+      - name: dsm_name
+        description: "DSM 성명"
+      - name: dso_name
+        description: "DSO 명칭"
+      - name: cur_user
+        description: "현 담당자명"
+      - name: cur_user_prid
+        description: "현 담당자 PRID"
+      - name: cur_dsm
+        description: "현 DSM 성명"
+      - name: cur_dsm_prid
+        description: "현 DSM PRID"
+      - name: cur_dso
+        description: "현 DSO 명칭"
+      - name: cur_team
+        description: "현 팀 명칭"
+      - name: sales_target
+        description: "매출 목표 금액"
+      - name: sales_tracking
+        description: "매출 트래킹 금액"
+      - name: sales_tracking_vol
+        description: "매출 트래킹 수량"
+      - name: achieve_rate
+        description: "목표 달성률"
+      - name: growth_rate
+        description: "성장률"
+      - name: m_s
+        description: "시장 점유율 금액 기준"
+      - name: m_s_vol
+        description: "시장 점유율 수량 기준"
+      - name: ddd_market
+        description: "DDD 시장 전체 금액"
+      - name: ddd_market_vol
+        description: "DDD 시장 전체 수량"
+      - name: ddd_az
+        description: "DDD AZ 금액"
+      - name: ddd_az_vol
+        description: "DDD AZ 수량"
+      - name: invoice_projcetion
+        description: "Invoice Projection"
+      - name: invoice_projcetion_2014
+        description: "Invoice Projection 2014"
+      - name: invoice_projcetion_2015
+        description: "Invoice Projection 2015"
+

@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: inv_fcst_acc_cl_m_prep
+    description: "예측 정확도(Forecast Accuracy) 월별 Silver 테이블 (파일 우선순위: FA_Data.xlsx > FA_YYYYMM.xlsx > FA_YYYYMM.xls)"
+    columns:
+      - name: base_month
+        description: "기준월 (해당 월 1일자, 파티션 교체 키)"
+        tests:
+          - not_null
+      - name: market
+        description: "시장 코드/명칭"
+      - name: selling_sub_region
+        description: "판매 하위 지역 (selling_sub_region 또는 sub_region)"
+      - name: material_code
+        description: "로컬 자재 코드 (main_local_code)"
+      - name: brand_name
+        description: "브랜드명"
+      - name: material_desc
+        description: "자재 상세 명칭 (product_item_name)"
+      - name: segmentation
+        description: "세그먼테이션"
+      - name: pack_class
+        description: "포장 분류 (Pack Class)"
+      - name: category
+        description: "카테고리"
+      - name: usage_type
+        description: "사용 유형 (Usage Type)"
+      - name: lag
+        description: "예측 시차 (Lag)"
+      - name: uom
+        description: "측정 단위 (UOM)"
+      - name: bias_flag_3m
+        description: "3개월 편향(Bias) 플래그"
+      - name: bias_type_3m
+        description: "3개월 편향(Bias) 유형"
+      - name: bias_flag_age_3m
+        description: "3개월 편향 플래그 지속 개월 수"
+      - name: esf_volume
+        description: "예측 판매량 (ESF Volume)"
+      - name: sales_volume
+        description: "실제 판매량 (Sales Volume)"
+      - name: forecast_error
+        description: "예측 오차 수량"
+      - name: forecast_error_pct
+        description: "예측 오차율"
+      - name: forecast_accuracy_pct
+        description: "예측 정확도율 (Forecast Accuracy)"
+      - name: forecast_accuracy_unconst
+        description: "비제약 예측 정확도율 (Unconstrained Forecast Accuracy)"
+      - name: abs_forecast_error
+        description: "절대 예측 오차 수량"
+      - name: mape
+        description: "절대 백분율 오차 (MAPE)"
+      - name: bias_mape
+        description: "편향 MAPE (Bias MAPE)"
+      - name: unit_cost_price
+        description: "단위 원가"
+      - name: forecast_error_value
+        description: "예측 오차 금액"
+      - name: sales_value_usd
+        description: "판매 금액 (USD)"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

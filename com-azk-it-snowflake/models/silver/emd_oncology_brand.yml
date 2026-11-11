@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: emd_oncology_brand
+    description: "Oncology 5대 브랜드(Enhertu, Tagrisso, Imfinzi, Lynparza, Zoladex) 월별 성과 지표 Silver 테이블"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - brand_name
+            - product_name
+            - molecule_desc
+            - pack_desc
+            - strength
+            - nfc_2
+            - year
+            - mm
+    columns:
+      - name: brand_name
+        description: "항암 브랜드명 (Enhertu, Tagrisso, Imfinzi, Lynparza, Zoladex)"
+        tests:
+          - not_null
+      - name: product_name
+        description: "제품명"
+        tests:
+          - not_null
+      - name: molecule_desc
+        description: "성분명 (Grand Total 제외)"
+      - name: pack_desc
+        description: "포장 단위 설명 (Zoladex 해당)"
+      - name: strength
+        description: "함량 (Lynparza 해당)"
+      - name: nfc_2
+        description: "NFC 2 분류 (Lynparza 해당)"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: units
+        description: "판매 수량 (Units)"
+      - name: counting_units
+        description: "집계 수량 (Counting Units)"
+      - name: values_usd
+        description: "판매 금액 (USD)"
+      - name: values_lc
+        description: "판매 금액 (KRW / Local Currency)"
+      - name: units_growth_py
+        description: "전년 동기 대비 수량 성장률"
+      - name: units_market_share
+        description: "수량 기준 시장 점유율"
+      - name: values_usd_growth_py
+        description: "전년 동기 대비 USD 금액 성장률"
+      - name: values_usd_market_share
+        description: "USD 금액 기준 시장 점유율"
+      - name: values_lc_growth_py
+        description: "전년 동기 대비 LC 금액 성장률"
+      - name: values_lc_market_share
+        description: "LC 금액 기준 시장 점유율"
+

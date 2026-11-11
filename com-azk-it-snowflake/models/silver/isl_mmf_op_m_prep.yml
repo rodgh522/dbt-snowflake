@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: isl_mmf_op_m_prep
+    description: "월중 예측(Mid-Month Forecast, MMF) 월별 Silver 테이블 (isl_fx_rates 활성 환율 기반 USD/KRW 환산)"
+    columns:
+      - name: base_month
+        description: "예측 기준월 (해당 월 1일자)"
+        tests:
+          - not_null
+      - name: material_code
+        description: "자재 코드"
+        tests:
+          - not_null
+      - name: material_desc
+        description: "자재 상세 명칭"
+      - name: brand_code
+        description: "브랜드 코드 (Subtotal 제외)"
+      - name: brand_name
+        description: "브랜드 명칭"
+      - name: brand_group
+        description: "브랜드 그룹 / 제출월 구분"
+      - name: amount
+        description: "원천 예측 금액 (단위: USD 백만)"
+        tests:
+          - not_null
+      - name: amount_usd
+        description: "USD 환산 금액 (amount * 1,000,000)"
+        tests:
+          - not_null
+      - name: amount_krw
+        description: "KRW 환산 금액 (amount_usd * 활성 환율)"
+        tests:
+          - not_null
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

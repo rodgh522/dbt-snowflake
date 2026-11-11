@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: emd_market_spending
+    description: "시장별(iOAD, PPI, Respiratory_Spending, Statin) 마케팅 지출 금액(Market Spending) 월별 Silver 테이블"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - brand_name
+            - criteria
+            - main_players
+            - year
+            - mm
+    columns:
+      - name: brand_name
+        description: "시장/브랜드 구분 (iOAD, PPI, Respiratory_Spending, Statin)"
+        tests:
+          - not_null
+      - name: criteria
+        description: "지출 기준 (criteria_m_krw_)"
+      - name: main_players
+        description: "주요 경쟁사/플레이어"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: spending_amt
+        description: "지출 금액 (NUMBER(15,2))"
+

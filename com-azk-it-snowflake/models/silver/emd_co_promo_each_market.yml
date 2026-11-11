@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: emd_co_promo_each_market
+    description: "Co-Promotion 시장별 Detail Frequency(RX_COUNT) 및 SOV(RX_SHARE) 월별 Silver 테이블"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - channel_specialty
+            - brand_name
+            - year
+            - mm
+    columns:
+      - name: channel_specialty
+        description: "채널 및 전문과 (specialty)"
+      - name: brand_name
+        description: "브랜드/제품명 (product_name)"
+        tests:
+          - not_null
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: rx_count
+        description: "디테일 빈도 / 처방 수 (Detail Frequency 시트, NUMBER(15,2))"
+      - name: rx_share
+        description: "점유율 (SOV 시트, NUMBER(15,6))"
+

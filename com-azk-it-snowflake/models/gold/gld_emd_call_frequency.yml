@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: gld_emd_call_frequency
+    description: "시장별(iOAD, PPI, Respiratory, Statin) Call Frequency 최종 Gold 테이블 (물리 테이블명: EMD_CALL_FREQUENCY)"
+    columns:
+      - name: brand_name
+        description: "시장/브랜드 구분"
+        tests:
+          - not_null
+      - name: criteria
+        description: "콜 기준 구분"
+      - name: main_players
+        description: "주요 경쟁사/플레이어"
+      - name: channel_specialty
+        description: "채널 및 진료과"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: visit_call
+        description: "방문 콜 수"
+

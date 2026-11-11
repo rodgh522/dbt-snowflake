@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: gld_emd_enpire_ddd_data
+    description: "Enpire KR DDD (Crestor 및 경쟁품) Brick별 실적 최종 Gold 테이블 (물리 테이블명: EMD_ENPIRE_DDD_DATA)"
+    columns:
+      - name: year_mm
+        description: "기준 년월"
+      - name: brick_code
+        description: "브릭 코드"
+      - name: brick_name
+        description: "브릭 명칭"
+      - name: ims_brick_code
+        description: "IMS 브릭 코드"
+      - name: ims_brick_name
+        description: "IMS 브릭 명칭"
+      - name: azk_brand
+        description: "AZK 브랜드명"
+      - name: competitors
+        description: "경쟁 제품명"
+      - name: channel
+        description: "채널"
+      - name: priority
+        description: "우선순위"
+      - name: team_name
+        description: "팀 명칭"
+      - name: dso_name
+        description: "DSO 명칭"
+      - name: dsm_name
+        description: "DSM 성명"
+      - name: dsm_prid
+        description: "DSM PRID"
+      - name: user_prid
+        description: "담당자 PRID"
+      - name: user_name
+        description: "담당자 성명"
+      - name: ddd_value
+        description: "DDD 금액"
+      - name: value_ms
+        description: "DDD 금액 점유율"
+      - name: ddd_volume
+        description: "DDD 수량"
+      - name: volume_ms
+        description: "DDD 수량 점유율"
+

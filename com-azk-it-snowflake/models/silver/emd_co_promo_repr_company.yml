@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: emd_co_promo_repr_company
+    description: "Co-Promotion 파트너 제약사별 처방 실적 및 점유율 월별 Silver 테이블"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - corporation
+            - channel
+            - manufacturer
+            - local_brand_name
+            - year
+            - mm
+    columns:
+      - name: corporation
+        description: "파트너 제약사명 (시트명 대문자 정규화)"
+        tests:
+          - not_null
+      - name: channel
+        description: "채널 구분 (priv_hosp)"
+      - name: rank
+        description: "순위 (숫자 외 값은 NULL)"
+      - name: manufacturer
+        description: "제조사명"
+      - name: local_brand_name
+        description: "로컬 브랜드명"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: rx_count
+        description: "처방 건수/수량 (NUMBER(15,0))"
+      - name: rx_share
+        description: "처방 점유율 (NUMBER(15,6))"
+

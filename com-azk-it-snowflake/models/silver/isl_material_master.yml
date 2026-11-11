@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: isl_material_master
+    description: "전사 표준 자재/브랜드 매핑 마스터(Conformed Material Master) Silver 테이블"
+    columns:
+      - name: material_code
+        description: "자재 코드 (PK)"
+        tests:
+          - not_null
+          - unique
+      - name: material_desc
+        description: "자재 상세 명칭 (신규 기준)"
+      - name: material_desc_old
+        description: "자재 상세 명칭 (구 기준)"
+      - name: brand_code
+        description: "브랜드 코드"
+      - name: brand_name
+        description: "브랜드 명칭 (코드 접두사 제거)"
+      - name: brand_group
+        description: "브랜드 그룹 (Product Group 1)"
+      - name: therapy_area
+        description: "치료 영역 (TA)"
+      - name: business_unit
+        description: "사업부 (BU)"
+      - name: bu_order
+        description: "사업부 정렬 순서"
+      - name: ta_order
+        description: "치료 영역 정렬 순서"
+      - name: product_group_order
+        description: "제품 그룹 정렬 순서"
+      - name: product_order
+        description: "제품 정렬 순서"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: isl_bgt_cl_m_prep
+    description: "예산 매출 및 물량(Budget Revenue & Volume) 월별 Silver 테이블 (jan..dec=매출, jan_1..dec_1=수량 Unpivot & Pivot)"
+    columns:
+      - name: base_month
+        description: "기준월 (해당 월 1일자, 파티션 교체 키)"
+        tests:
+          - not_null
+      - name: material_code
+        description: "자재 코드"
+        tests:
+          - not_null
+      - name: material_desc
+        description: "자재 설명"
+      - name: brand_code
+        description: "브랜드 코드"
+      - name: brand_name
+        description: "브랜드 명칭 (숫자 코드 접두사 제거)"
+      - name: fiscal_year
+        description: "회계연도 (예: FY25, FY26)"
+        tests:
+          - not_null
+      - name: value_type
+        description: "값 유형 구분 (Value Type)"
+        tests:
+          - not_null
+      - name: pr_material_code
+        description: "PR 자재 코드 (FY25+ 해당)"
+      - name: year_num
+        description: "파싱된 4자리 연도"
+        tests:
+          - not_null
+      - name: amount
+        description: "예산 매출 금액 (DECIMAL(20,4))"
+        tests:
+          - not_null
+      - name: volume
+        description: "예산 판매 수량 (DECIMAL(18,2))"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

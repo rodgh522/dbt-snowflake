@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: emd_call_frequency
+    description: "시장별(iOAD, PPI, Respiratory, Statin) Call Frequency 월별 Silver 테이블"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - brand_name
+            - criteria
+            - main_players
+            - channel_specialty
+            - year
+            - mm
+    columns:
+      - name: brand_name
+        description: "시장/브랜드 구분 (iOAD, PPI, Respiratory, Statin)"
+        tests:
+          - not_null
+      - name: criteria
+        description: "콜 기준 구분 (criteria_of_calls_)"
+      - name: main_players
+        description: "주요 경쟁사/플레이어"
+      - name: channel_specialty
+        description: "채널 및 진료과 (Channel / Specialty)"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: visit_call
+        description: "방문 콜 수 (NUMBER(15,2))"
+

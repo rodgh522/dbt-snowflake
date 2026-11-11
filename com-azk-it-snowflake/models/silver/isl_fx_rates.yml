@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: isl_fx_rates
+    description: "환율 마스터(FX Rates) Silver 테이블 (최신 연도 환율이 use_yn = 'Y'로 활성화)"
+    columns:
+      - name: br_year
+        description: "원천 기준 연도 텍스트 (예: 2026 BR)"
+        tests:
+          - not_null
+      - name: rt_exchange_usd_to_krw
+        description: "USD 대비 KRW 적용 환율 (정수형)"
+        tests:
+          - not_null
+      - name: base_year
+        description: "파싱된 4자리 기준 연도"
+        tests:
+          - not_null
+      - name: use_yn
+        description: "현재 활성 환율 여부 ('Y': 최신 기준 연도, 'N': 과거 연도)"
+        tests:
+          - not_null
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

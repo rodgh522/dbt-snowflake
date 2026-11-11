@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: npp_rama_tracker_obu
+    description: "NPP RAMA Tracker - OBU(항암사업부) 인허가 및 급여 일정 트래킹 Silver 테이블"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - ta
+            - brand
+            - study_name
+            - indication
+            - dedup_seq
+    columns:
+      - name: ta
+        description: "치료 영역 (시트명)"
+      - name: brand
+        description: "브랜드명"
+      - name: study_name
+        description: "임상 연구명 (Study Name)"
+      - name: indication
+        description: "적응증 (Indication)"
+      - name: current_status
+        description: "현재 진행 상태"
+      - name: ra_category
+        description: "RA 카테고리"
+      - name: gift_odd
+        description: "GIFT / ODD 지정 여부"
+      - name: pnr_track
+        description: "P&R 트랙 구분"
+      - name: ra_submission_base
+        description: "RA 제출 기준일 (YYYY-MM-DD 또는 텍스트)"
+      - name: ra_approval_base
+        description: "RA 승인 기준일"
+      - name: pnr_submission_base
+        description: "P&R 제출 기준일"
+      - name: reim_launch_best
+        description: "급여 등재/출시 최선 예상일 (Best)"
+      - name: reim_launch_base
+        description: "급여 등재/출시 기본 예상일 (Base)"
+      - name: ra_remarks
+        description: "RA 비고 및 주요 마일스톤"
+      - name: pnr_remarks
+        description: "P&R 비고 및 주요 마일스톤"
+      - name: ra_lead
+        description: "RA 담당 리드"
+      - name: pnr_lead
+        description: "P&R 담당 리드"
+      - name: country_submission_1st
+        description: "최초 제출 국가"
+      - name: country_approval_1st
+        description: "최초 승인 국가"
+      - name: pivotal_study
+        description: "Pivotal 임상 연구 여부 (Y/N)"
+      - name: need_for_korean_bridging_purpose
+        description: "한국 가교 시험 필요 여부 (Y/N/TBD)"
+      - name: required_for_reg_submission
+        description: "허가 제출 필수 분석군(FAS) 요건"
+      - name: dedup_seq
+        description: "동일 (TA, BRAND, STUDY_NAME, INDICATION) 내 원본 라인 순번"
+        tests:
+          - not_null
+

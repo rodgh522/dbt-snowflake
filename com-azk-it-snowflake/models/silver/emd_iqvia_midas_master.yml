@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: emd_iqvia_midas_master
+    description: "IQVIA MIDAS 분기별 시장/제품 마스터 및 매출 금액(VALUE_AMT) Silver 테이블"
+    columns:
+      - name: therapy_area
+        description: "치료 영역 (Therapy Area)"
+      - name: gmd
+        description: "GMD 분류"
+      - name: gmd_sub_mkt
+        description: "GMD 세부 시장"
+      - name: atc1
+        description: "ATC 1단계 코드"
+      - name: atc2
+        description: "ATC 2단계 코드"
+      - name: atc3
+        description: "ATC 3단계 코드"
+      - name: atc4
+        description: "ATC 4단계 코드"
+      - name: mnc
+        description: "다국적 제약사 여부 (MNC)"
+      - name: hospital_retail_split
+        description: "병원/약국 구분 (Hospital/Retail Split)"
+      - name: manufacturer
+        description: "제조사"
+      - name: international_product_launch_date
+        description: "글로벌 제품 출시일"
+      - name: corporation
+        description: "제약 법인명 (Corporation)"
+      - name: international_product
+        description: "글로벌 제품명"
+      - name: molecule_combination
+        description: "성분 조합 (Molecule Combination)"
+      - name: product_family
+        description: "제품군 (Product Family)"
+      - name: international_prescription_status
+        description: "처방 구분 (ETC/OTC 등)"
+      - name: international_corporation_analysis_atc
+        description: "글로벌 법인 ATC 분석 구분"
+      - name: innovation_insights
+        description: "Innovation Insights 구분"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: qq
+        description: "분기 (Q1~Q4)"
+        tests:
+          - not_null
+      - name: value_amt
+        description: "분기 실적 금액 (FLOAT)"
+        tests:
+          - not_null
+

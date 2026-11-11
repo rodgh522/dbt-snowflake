@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: isl_patient_progress_top_hcp
+    description: "신환 진행 현황 주요 병원(Top HCP/HCA) 티어 매핑 Silver 마스터 테이블"
+    columns:
+      - name: hcp
+        description: "병원/기관명 (brick_name, PK)"
+        tests:
+          - not_null
+          - unique
+      - name: tier
+        description: "병원 티어 등급 (Top5, Top10, Top20, Top30 등)"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

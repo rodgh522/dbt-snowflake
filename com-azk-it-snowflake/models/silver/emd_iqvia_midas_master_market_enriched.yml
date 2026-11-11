@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: emd_iqvia_midas_master_market_enriched
+    description: "IQVIA MIDAS 마스터에 ETC 및 ETC/OTC 시장 분류 코드표를 결합한 Silver 테이블"
+    columns:
+      - name: therapy_area
+        description: "치료 영역"
+      - name: atc1
+        description: "ATC 1단계 코드"
+      - name: atc2
+        description: "ATC 2단계 코드"
+      - name: atc3
+        description: "ATC 3단계 코드"
+      - name: atc4
+        description: "ATC 4단계 코드"
+      - name: mnc
+        description: "다국적 제약사 여부"
+      - name: hospital_retail_split
+        description: "병원/약국 구분"
+      - name: manufacturer
+        description: "제조사"
+      - name: international_product_launch_date
+        description: "글로벌 제품 출시일"
+      - name: corporation
+        description: "제약 법인명"
+      - name: international_product
+        description: "글로벌 제품명"
+      - name: molecule_combination
+        description: "성분 조합"
+      - name: product_family
+        description: "제품군"
+      - name: international_prescription_status
+        description: "처방 구분"
+      - name: international_corporation_analysis_atc
+        description: "글로벌 법인 ATC 분석 구분"
+      - name: innovation_insights
+        description: "Innovation Insights 구분"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: qq
+        description: "분기 (Q1~Q4)"
+        tests:
+          - not_null
+      - name: value_amt
+        description: "분기 실적 금액"
+        tests:
+          - not_null
+      - name: etc_market_detail
+        description: "ETC 시장 상세 분류 (IQVIA_MARKET_CODE_ETC 참조)"
+      - name: etc_definition
+        description: "ETC 시장 정의 1"
+      - name: etc_definition2
+        description: "ETC 시장 정의 2"
+      - name: etc_otc_market_detail
+        description: "ETC/OTC 통합 시장 상세 분류 (IQVIA_MARKET_CODE_ETC_OTC 참조)"
+      - name: etc_otc_gmd
+        description: "ETC/OTC GMD 분류"
+      - name: etc_otc_chart_name
+        description: "ETC/OTC 차트 표시 명칭"
+

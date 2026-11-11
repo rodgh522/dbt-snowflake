@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: isl_rdr_op_m_prep
+    description: "매출 차감률(Revenue Deduction Rate) 월별 Silver 테이블 (자재 x 월 Unpivot)"
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - base_month
+            - material_code
+    columns:
+      - name: base_month
+        description: "기준월 (해당 월 1일자)"
+        tests:
+          - not_null
+      - name: material_code
+        description: "자재 코드 (SKU)"
+        tests:
+          - not_null
+      - name: material_desc
+        description: "자재 설명 (SKU Description)"
+      - name: brand_name
+        description: "브랜드명"
+      - name: deduction_rate
+        description: "매출 차감률"
+        tests:
+          - not_null
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

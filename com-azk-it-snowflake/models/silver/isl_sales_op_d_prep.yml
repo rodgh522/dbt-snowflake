@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: isl_sales_op_d_prep
+    description: "일별 매출(KR10 MTD) Silver 테이블 (base_date 단위 파티션 교체)"
+    columns:
+      - name: base_date
+        description: "문서 일자 (doc_date 파싱, 파티션 교체 키)"
+        tests:
+          - not_null
+      - name: sold_to_pt
+        description: "판매처 코드 (Sold-to Party)"
+      - name: item_no
+        description: "품목 번호 (Item)"
+      - name: customer_name
+        description: "고객명 (name_1)"
+      - name: ship_to
+        description: "납품처 (Ship-to)"
+      - name: material_code
+        description: "자재 코드"
+        tests:
+          - not_null
+      - name: material_desc
+        description: "자재 설명"
+      - name: actual_net_qty
+        description: "실제 순 판매 수량 (actnetqty)"
+      - name: net_price
+        description: "순 단가 (net_price, 정수)"
+      - name: actual_net_value
+        description: "실제 순 판매 금액 (actnetval)"
+      - name: net_value
+        description: "순 판매 금액 (net_value)"
+      - name: po_number
+        description: "구매 주문 번호 (PO Number)"
+      - name: sales_doc_type
+        description: "판매 문서 유형 (saty)"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 원천 소스의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

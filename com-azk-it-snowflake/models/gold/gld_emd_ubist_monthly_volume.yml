@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: gld_emd_ubist_monthly_volume
+    description: "UBIST 월간 처방량(Crestor, Nexium, Symbicort) 최종 Gold 테이블 (물리 테이블명: EMD_UBIST_MONTHLY_VOLUME)"
+    columns:
+      - name: brand_name
+        description: "브랜드명"
+      - name: therapy_area
+        description: "치료 영역 (TA)"
+      - name: bu
+        description: "사업부 (BU)"
+      - name: atc4
+        description: "ATC 4단계 코드"
+      - name: definition
+        description: "시장 정의"
+      - name: molecule_combination
+        description: "성분 조합"
+      - name: product_name
+        description: "제품명"
+      - name: mono_original_generic
+        description: "단일제 오리지널 vs 제네릭 구분"
+      - name: competitor_list_for_chart
+        description: "차트용 경쟁사 목록 구분"
+      - name: corporation
+        description: "제약사명"
+      - name: gx_original
+        description: "제네릭 vs 오리지널 구분"
+      - name: bed_number
+        description: "병상 수 규모 구분"
+      - name: channel
+        description: "채널"
+      - name: year
+        description: "4자리 연도"
+        tests:
+          - not_null
+      - name: mm
+        description: "2자리 월"
+        tests:
+          - not_null
+      - name: yyyymmdd
+        description: "기준월 1일자 (YYYY-MM-01)"
+        tests:
+          - not_null
+      - name: rx_volume
+        description: "처방 수량 (Counting Units)"
+      - name: rx_dot_volume
+        description: "처방 일수 기준 수량 (DOT)"
+

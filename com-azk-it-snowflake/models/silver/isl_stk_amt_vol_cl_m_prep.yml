@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: isl_stk_amt_vol_cl_m_prep
+    description: "시중 재고 금액 및 수량(In-Market Stock Amount & Volume) 월별 Silver 테이블 (Stock value / Stock vol 시트 결합)"
+    columns:
+      - name: base_month
+        description: "기준월 (col_YYMM 파싱, 해당 월 1일자)"
+        tests:
+          - not_null
+      - name: material_code
+        description: "자재 코드 (Enhertu -> '2082 Enhertu' 정규화 적용)"
+        tests:
+          - not_null
+      - name: material_code_old
+        description: "구 자재 코드"
+      - name: material_desc
+        description: "영문 자재 설명"
+      - name: material_desc_kr
+        description: "국문 자재 설명"
+      - name: brand_code
+        description: "브랜드 코드"
+      - name: brand_name
+        description: "브랜드 명칭"
+      - name: brand_group
+        description: "브랜드 패밀리/그룹"
+      - name: therapy_area
+        description: "치료 영역 (TA)"
+      - name: business_unit
+        description: "사업부 (BU)"
+      - name: material_biz_type_cd
+        description: "자재 사업 유형 구분 (divested_partner)"
+      - name: channel_type
+        description: "채널 구분 ('Total': col_YYMM, 'Channel': _1, 'Partner': _2)"
+        tests:
+          - not_null
+      - name: stock_amount
+        description: "재고 금액 (Stock value 시트)"
+      - name: stock_volume
+        description: "재고 수량 (Stock vol 시트)"
+      - name: _load_dtm
+        description: "Silver 테이블 적재 일시 (KST/Asia/Seoul 기준)"
+        tests:
+          - not_null
+      - name: _src_synced
+        description: "참조된 Bronze 시트의 최신 _fivetran_synced 일시"
+        tests:
+          - not_null
+

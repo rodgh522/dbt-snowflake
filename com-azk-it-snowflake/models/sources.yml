@@ -9,7 +9,111 @@ sources:
       schema: false
       identifier: true
     tables:
+      # 1. INV (Inventory & Supply Chain) Domain
+      - name: fa_data
+        description: "예측 정확도(Forecast Accuracy) 원천 데이터 (FA_Data.xlsx, FA_YYYYMM.xlsx/xls)"
+      - name: kr_material_master
+        description: "공급망 자재 마스터(KR Material Master) 원천 테이블"
+      - name: submission_month
+        description: "판매량 예측 스냅샷(Submission Month) Wide 포맷 원천 테이블"
+      - name: inventory_supply_plan
+        description: "공급 계획(Supply Plan) 원천 테이블 (Supply plan.XLSX)"
+      - name: kr_stock_reconciliation
+        description: "재고 대사(SAP vs DC Stock Reconciliation) 원천 테이블"
+
+      # 2. ISL (In-Market Sales, Revenue & Patient Progress) Domain
+      - name: budget_total_revenue_volume
+        description: "예산 매출 및 물량(Budget Total Revenue & Volume) 원천 테이블"
+      - name: fx_rates
+        description: "환율 마스터(FX Rates) 원천 테이블"
+      - name: sku_mapping
+        description: "전사 표준 제품/SKU 매핑(Conformed Material Master) 원천 테이블"
+      - name: mmf
+        description: "월중 예측(Mid-Month Forecast, MMF) 원천 테이블"
+      - name: patient_progress_brands_tophca
+        description: "주요 병원(Top HCP/HCA) 티어 매핑 원천 테이블"
       - name: patient_progress_brands_enhertu
         description: "Enhertu 브랜드 신환 진행 현황 원천 Iceberg 테이블"
       - name: patient_progress_brands_tagrisso
         description: "Tagrisso 브랜드 신환 진행 현황 원천 Iceberg 테이블"
+      - name: patner_list
+        description: "파트너사 일별 매출(Partner List) 원천 테이블"
+      - name: revenue_deduction_rates
+        description: "매출 차감률(Revenue Deduction Rates) 원천 테이블"
+      - name: actual_total_revenue_and_volume
+        description: "실적 매출 및 물량(Actual Total Revenue & Volume) 원천 테이블"
+      - name: enhertu_daily_sales_order_list
+        description: "Enhertu 일별 매출 오더 리스트 원천 테이블"
+      - name: kr_10_mtd
+        description: "일별 매출(KR10 MTD) 원천 테이블"
+      - name: stock_in_market_sales_stock
+        description: "시중 재고 금액/수량 및 In-market Sales 통합 시트 원천 테이블"
+
+      # 3. EMD & NPP (External Market Data & New Product Planning) Domain
+      - name: kr_dashboard_call_spending_ioad_market_call_frequency
+        description: "iOAD 시장 Call Frequency 원천 테이블"
+      - name: kr_dashboard_call_spending_ppi_market_call_frequency
+        description: "PPI 시장 Call Frequency 원천 테이블"
+      - name: kr_dashboard_call_spending_respiratory_call_frequency
+        description: "Respiratory 시장 Call Frequency 원천 테이블"
+      - name: kr_dashboard_call_spending_stain_market_call_freqeuncy
+        description: "Statin 시장 Call Frequency 원천 테이블"
+      - name: azk_co_promotion_company_report
+        description: "Co-Promotion 파트너사 리포트 원천 테이블 (Detail Frequency, SOV 및 회사별 시트)"
+      - name: enpire_kr_brick_data
+        description: "Enpire KR Brick 실적 및 DDD 데이터 원천 테이블"
+      - name: enpire_kr_ddd_crestor
+        description: "Enpire KR DDD Crestor 원천 테이블"
+      - name: iqvia_midas_raw_master
+        description: "IQVIA MIDAS 분기별 Raw Master 원천 테이블"
+      - name: kr_dashboard_call_spending
+        description: "iOAD 시장 Market Spending 원천 테이블"
+      - name: kr_dashboard_call_spending_ppi_market_spending
+        description: "PPI 시장 Market Spending 원천 테이블"
+      - name: kr_dashboard_call_spending_respiratory_spending
+        description: "Respiratory 시장 Market Spending 원천 테이블"
+      - name: kr_dashboard_call_spending_stain_market_spending
+        description: "Statin 시장 Market Spending 원천 테이블"
+      - name: npp_obu_rama_tracker
+        description: "NPP RAMA Tracker OBU(항암사업부) 원천 테이블"
+      - name: npp_bbu_rama_tracker
+        description: "NPP RAMA Tracker BBU(바이오의약품사업부) 원천 테이블"
+      - name: npp_rd_rama_tracker
+        description: "NPP RAMA Tracker RDU(희귀질환사업부) 원천 테이블"
+      - name: kr_dashboard_oncology_brand_performance_enhertu_monthly
+        description: "Oncology 브랜드 성과 - Enhertu 월간 원천 테이블"
+      - name: kr_dashboard_oncology_brand_performance_tagrisso_monthly_updated
+        description: "Oncology 브랜드 성과 - Tagrisso 월간 원천 테이블"
+      - name: kr_dashboard_oncology_brand_performance_lmfinzi_monthly
+        description: "Oncology 브랜드 성과 - Imfinzi 월간 원천 테이블"
+      - name: kr_dashboard_oncology_brand_performance_lynparza_monthly
+        description: "Oncology 브랜드 성과 - Lynparza 월간 원천 테이블"
+      - name: kr_dashboard_oncology_brand_performance_zoldadex_monthly
+        description: "Oncology 브랜드 성과 - Zoladex 월간 원천 테이블"
+      - name: kr_dashboard_oncology_brand_performance_zoladex_volume_updated
+        description: "Oncology 브랜드 성과 - Zoladex 볼륨 업데이트 원천 테이블"
+      - name: kr_dashboard_ubist_volume_monthly_bbu_crestor
+        description: "UBIST 월간 처방량 - Crestor 원천 테이블"
+      - name: kr_dashboard_ubist_volume_monthly_bbu_nexium
+        description: "UBIST 월간 처방량 - Nexium 원천 테이블"
+      - name: kr_dashboard_ubist_volume_monthly_bbu_symbicort_cl
+        description: "UBIST 월간 처방량 - Symbicort CL 원천 테이블"
+      - name: kr_dashboard_ubist_volume_monthly_bbu_symbicort_gh
+        description: "UBIST 월간 처방량 - Symbicort GH 원천 테이블"
+      - name: kr_dashboard_ubist_volume_monthly_bbu_symbicort_sh
+        description: "UBIST 월간 처방량 - Symbicort SH 원천 테이블"
+      - name: ubist_monthly_xigduo_sidapvia
+        description: "UBIST 월간 처방량 - Xigduo & Sidapvia 원천 테이블"
+
+  - name: silver_ref
+    database: "DBT_TEST"
+    schema: "AIBI_SILVER"
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+    tables:
+      - name: IQVIA_MARKET_CODE_ETC
+        description: "IQVIA 시장 분류 코드 마스터 (ETC)"
+      - name: IQVIA_MARKET_CODE_ETC_OTC
+        description: "IQVIA 시장 분류 코드 마스터 (ETC/OTC)"
